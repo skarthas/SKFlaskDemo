@@ -2,3 +2,6 @@ scipy
 numpy
 pandas
 bokeh
+datetime
+requests
+os
