@@ -21,18 +21,20 @@ def main():
 def indexes():
   if request.method == 'GET':
   	return render_template('index.html')
-  else: 
+  else:
+	print("I got here") 
 	app.vars['tickername'] = request.form['ticker']
-	app.vars['close'] = request.form['cprice']
-	app.vars['aclose'] = request.form['acprice']
-	app.vars['open'] = request.form['oprice']
-	app.vars['aopen'] = request.form['aoprice']
+	app.vars['close'] = request.form.get('cprice')
+	app.vars['aclose'] = request.form.get('acprice')
+	app.vars['open'] = request.form.get('oprice')
+	app.vars['aopen'] = request.form.get('aoprice')
+	#print(app.vars['open'])
 	return redirect('/graphing')	
 
 @app.route('/graphing',methods=['GET'])
 def graphing():
-  now = datetime.now()-timedelta(days=3)
-  past = now-timedelta(days=33)
+  now = datetime.now()-timedelta(days=10)
+  past = now-timedelta(days=35)
   api_url='https://www.quandl.com/api/v3/datatables/WIKI/PRICES.json?ticker=%s&qopts.columns=date,open,close,adj_open,adj_close&date.gte=%s&date.lt=%s&api_key=zTJsP31gZnkKyDXYG5DD' % (app.vars['tickername'],past.strftime("%Y%m%d"),now.strftime("%Y%m%d"))
   session = requests.Session()
   session.mount('http://', requests.adapters.HTTPAdapter(max_retries=5))
@@ -40,19 +42,18 @@ def graphing():
   data = raw_data.json()
   pdf = pd.DataFrame(data['datatable']['data'],columns=['dates','open','close','adj_open','adj_close'])
   pdf['dates']=pd.to_datetime(pdf['dates'])
-  print(pdf.dtypes)
   ts = pd.Series(np.random.randn(1000), index=pd.date_range('1/1/2000', periods=1000))
   plot = figure(title='Data from Quandle WIKI set',x_axis_label='date',x_axis_type='datetime')
-  if(app.vars['close']=='on'):
+  if(app.vars['close']):
 	plot.line(x=pdf['dates'],y=pdf['close'],legend='%s:Close'%app.vars['tickername'],color="blue") 
 
-  if(app.vars['aclose']=='on'):  
+  if(app.vars['aclose']):  
         plot.line(x=pdf['dates'],y=pdf['adj_close'],legend='%s:Adj. Close'%app.vars['tickername'],color="green")  
  
-  if(app.vars['open']=='on'):
+  if(app.vars['open']):
         plot.line(x=pdf['dates'],y=pdf['open'],legend='%s:Open'%app.vars['tickername'],color="orange")
 
-  if(app.vars['aopen']=='on'):
+  if(app.vars['aopen']):
         plot.line(x=pdf['dates'],y=pdf['adj_open'],legend='%s:Adj. Open'%app.vars['tickername'],color="red")
 
 
