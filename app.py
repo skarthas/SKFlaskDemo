@@ -38,7 +38,6 @@ def graphing():
   past = now-timedelta(days=30)
   while (past in holidays.UnitedStates() or past.weekday()>4):
         past = past-timedelta(days=1)
-  print(past)
 
   api_url='https://www.quandl.com/api/v3/datatables/WIKI/PRICES.json?ticker=%s&qopts.columns=date,open,close,adj_open,adj_close&date.gte=%s&date.lt=%s&api_key=zTJsP31gZnkKyDXYG5DD' % (app.vars['tickername'],past.strftime("%Y%m%d"),now.strftime("%Y%m%d"))
   session = requests.Session()
